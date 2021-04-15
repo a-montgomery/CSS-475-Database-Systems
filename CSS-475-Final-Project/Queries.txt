@@ -1,0 +1,117 @@
+SELECT date(Release_date) as Release_date, Album_title, Artist_id
+FROM ALBUM
+ORDER BY Release_date;
+
+SELECT s.Song_Title
+FROM SONG s, ARTIST art, ALBUM alb, SONG_IN_ALBUM sia
+WHERE (sia.Song_ID = s.Song_ID) AND (sia.Album_ID = alb.Album_ID) AND (s.Artist_ID = art.Artist_ID) AND (alb.Release_Date > julianday('2021-01-01')) AND (art.Artist_Name = 'The Weeknd'); 
+
+SELECT Label_Name, Artist_Name 
+FROM ARTIST a, RECORD_LABEL r 
+WHERE a.Label_ID = r.Label_ID 
+ORDER BY Artist_Name;
+
+SELECT Song_Title 
+FROM SONG s 
+ JOIN SONG_IN_GENRE sig ON s.Song_ID = sig.Song_ID 
+ JOIN GENRE g ON sig.Genre_ID = g.Genre_ID 
+WHERE g.Genre_Name = 'Hip-Hop';
+
+SELECT Album_Title
+FROM ALBUM alb
+	 JOIN SONG_IN_ALBUM sia ON alb.Album_ID = sia.Album_ID AND			 alb.Artist_ID = sia.Artist_ID
+	 JOIN SONG s ON s.Song_ID = sia.Song_ID AND s.Artist_ID = sia.Artist_ID
+	 JOIN ARTIST art ON s.Artist_ID = art.Artist_ID
+WHERE art.Artist_Name = 'Migos'
+GROUP BY alb.Album_ID
+HAVING SUM(s.total_plays) > 50000;
+
+SELECT SUM(s.Total_Plays) 
+FROM SONG s
+     JOIN Artist a ON a.Artist_ID = s.Artist_ID
+WHERE Artist_Name = 'The Weeknd';
+
+SELECT Password 
+FROM USER
+WHERE Username = 'Wynn';
+
+UPDATE USER
+SET Password = 'DJN2kiHkl'
+WHERE Username = 'Fischer';
+
+SELECT Genre_Name 
+FROM GENRE g
+     JOIN FAVORITE_GENRE fg 
+          ON g.Genre_ID = fg.Genre_ID
+GROUP BY fg.Genre_ID 
+ORDER BY COUNT(fg.Genre_ID)
+DESC
+LIMIT 3;
+
+SELECT s.Song_Title, alb.Album_Title, date(alb.Release_Date)
+FROM SONG s
+     JOIN SONG_IN_ALBUM sia ON sia.Song_ID = s.Song_ID
+     JOIN ALBUM alb ON sia.Album_ID = alb.Album_ID
+     JOIN FAVORITE_ARTIST fa ON fa.Artist_ID = sia.Artist_ID
+     JOIN USER u ON u.User_ID = fa.User_ID
+WHERE u.Username = 'Sears' AND alb.Release_Date >= julianday(date('now', '-7 day'));
+
+SELECT DISTINCT art.Artist_Name 
+FROM ARTIST art
+     JOIN FAVORITE_ARTIST fa ON art.Artist_ID = fa.Artist_ID
+     WHERE fa.User_ID IN (
+          SELECT u.User_ID
+          FROM USER u
+          JOIN FAVORITE_ARTIST fa ON fa.User_ID = u.User_ID
+          WHERE fa.Artist_ID = 4
+          ) AND fa.Artist_ID != 4;
+
+SELECT DISTINCT s.Song_Title
+FROM SONG s
+JOIN SONG_IN_PLAYLIST sip ON (s.Song_ID = sip.Song_ID AND s.Artist_ID = sip.Artist_ID) 
+JOIN PLAYLIST p ON p.Playlist_ID = sip.Playlist_ID
+JOIN USER u ON p.User_ID = u.User_ID
+WHERE s.Song_ID IN (
+ SELECT DISTINCT sip2.Song_ID 
+ FROM SONG_IN_PLAYLIST sip2 
+ WHERE sip2.Playlist_ID IN (
+  SELECT sip3.Playlist_ID 
+  FROM SONG_IN_PLAYLIST sip3 
+  WHERE sip3.Song_ID = 34 AND sip3.Artist_ID = 7 
+                                           AND sip3.Playlist_ID != 1
+  )
+ ) 
+AND (s.Song_ID != 34 OR s.Artist_ID != 7) AND u.User_ID != 1;
+
+SELECT Album_Title, Genre_Name 
+FROM (
+SELECT alb.Album_Title, g.Genre_Name,  COUNT(sig.Genre_ID) as Genre_Count
+  FROM SONG_IN_GENRE sig
+  JOIN GENRE g ON g.Genre_ID = sig.Genre_ID 
+  JOIN SONG s ON sig.Song_ID = s.Song_ID
+  JOIN SONG_IN_ALBUM sia ON sia.Song_ID = s.Song_ID
+  JOIN ALBUM alb ON sia.Album_ID = alb.Album_ID
+GROUP BY sig.Genre_ID, alb.Album_ID
+)
+WHERE Album_Title = 'Culture'
+GROUP BY Album_Title
+HAVING Genre_Count = MAX(Genre_Count);
+
+DELETE FROM SONG_IN_PLAYLIST 
+WHERE Song_ID = 
+  (SELECT sg.Song_ID 
+   FROM SONG s, SONG_IN_GENRE sg, GENRE g 
+   WHERE g.Genre_Name = 'Pop' AND g.Genre_ID = sg.Genre_ID AND s.Song_ID = sg.Song_ID);
+
+UPDATE USER
+SET Payment_Info = '2324132312344423'
+WHERE User_ID = 1;
+
+
+
+
+
+
+
+
+
